@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Training Tracker</title>
+<meta name="theme-color" content="#D9480F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#F1F3F6;--panel:#fff;--ink:#1B2430;--mute:#65707F;--line:#D9DEE5;--acc:#D9480F;--accink:#fff;--ok:#1E9E6A;--chip:#E8ECF2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12171E;--panel:#1B222C;--ink:#EAEEF3;--mute:#93A0B1;--line:#2B3441;--acc:#FF8A3D;--accink:#1B1006;--ok:#3CC58C;--chip:#263040}}
+:root[data-theme="dark"]{--bg:#12171E;--panel:#1B222C;--ink:#EAEEF3;--mute:#93A0B1;--line:#2B3441;--acc:#FF8A3D;--accink:#1B1006;--ok:#3CC58C;--chip:#263040}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 Barlow,system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 90px}
+h1{font:700 2.2rem/1 "Barlow Condensed",Impact,sans-serif;margin:0;letter-spacing:.01em}
+h2{font:700 1.5rem/1.1 "Barlow Condensed",Impact,sans-serif;margin:0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}
+.sum{color:var(--mute);font-size:.9rem;text-align:right}
+.bar{height:6px;background:var(--line);border-radius:3px;margin-top:6px;width:120px;margin-left:auto;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .25s}
+.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px}
+.tab{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:8px 0;font:600 .95rem Barlow,sans-serif;cursor:pointer;position:relative}
+.tab small{display:block;color:var(--mute);font-weight:500;font-size:.72rem}
+.tab[aria-selected=true]{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+.tab[aria-selected=true] small{color:inherit;opacity:.85}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.row{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.row.done{opacity:.55}.row.done .nm{text-decoration:line-through}
+.chk{width:28px;height:28px;accent-color:var(--ok);cursor:pointer}
+.nm{font-weight:600;font-size:1.05rem}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{background:var(--chip);border-radius:6px;padding:2px 8px;font-size:.85rem;color:var(--ink);border:0;font-family:inherit}
+button.chip{cursor:pointer;color:var(--acc);font-weight:600}
+.dayline{color:var(--mute);font-size:.8rem;margin-top:4px}
+.ic{background:none;border:0;color:var(--mute);cursor:pointer;font-size:.85rem;padding:6px;font-family:inherit}
+.ic:hover{color:var(--ink)}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:28px 16px;text-align:center;color:var(--mute);margin-bottom:12px}
+.btn{background:var(--acc);color:var(--accink);border:0;border-radius:8px;padding:12px 16px;font:600 1rem Barlow,sans-serif;cursor:pointer;width:100%}
+.btn.sec{background:var(--chip);color:var(--ink)}
+form,.fm{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:12px}
+label{display:block;font-size:.85rem;color:var(--mute);margin-bottom:4px}
+input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:1rem Barlow,sans-serif}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.days{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 16px}
+.days label{margin:0;color:var(--ink);cursor:pointer}
+.days input{position:absolute;opacity:0;width:0;height:0}
+.days span{display:inline-block;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-weight:600}
+.days input:checked+span{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+.days input:focus-visible+span{outline:2px solid var(--acc);outline-offset:2px}
+.acts{display:flex;gap:8px}
+.foot{display:flex;justify-content:space-between;margin-top:18px}
+#timer{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);display:none;justify-content:space-between;align-items:center;font:700 1.6rem "Barlow Condensed",sans-serif}
+#timer button{background:none;border:1px solid currentColor;color:inherit;border-radius:8px;padding:6px 12px;font:600 .95rem Barlow,sans-serif;cursor:pointer}
+.vsw{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.nav .ic{font-size:1.6rem;padding:2px 14px}
+.rbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.ch{text-align:center;font-size:.8rem;color:var(--mute);padding:4px 0}
+.cell{min-height:58px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);padding:4px;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.cell span{font-size:.72rem;color:var(--mute)}
+.cell.out{opacity:.4}.cell.tr{background:#D62839;border-color:#D62839;color:#fff}.cell.tr span{color:#fff}
+.cell.today{background:#F2FF00;border-color:#F2FF00;color:#111}.cell.today span{color:#333}.cell.out.today{opacity:1}
+.cell.today.tr{box-shadow:inset 0 0 0 3px #D62839}
+.wkrow{display:flex;justify-content:space-between;width:100%;text-align:left;color:var(--ink);font:inherit;cursor:pointer}
+[hidden]{display:none!important}
+.ap{display:flex;gap:8px;align-items:center;margin:6px 0;color:var(--ink);font-size:1rem}.ap input[type=radio]{width:auto;accent-color:var(--acc)}
+.rst{border:2px solid var(--acc);background:none;color:var(--acc);border-radius:8px;padding:6px 16px;font:600 .95rem Barlow,sans-serif;cursor:pointer;margin-bottom:6px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.mp{background:var(--panel);border-radius:12px;padding:22px;max-width:360px;width:100%}.mp p{font:700 1.4rem/1.15 "Barlow Condensed",Impact,sans-serif;margin:0 0 16px}
+.gh{margin:18px 0 6px}.gl{margin:0}.gl dt{font-weight:600;margin-top:10px}.gl dd{margin:2px 0 0;color:var(--mute);font-size:.92rem}
+</style>
+</head>
+<body>
+<div id="auth" hidden></div>
+<main id="app" hidden>
+  <div class="top">
+    <div><h1>Training tracker</h1><div class="dayline"><span id="who"></span> <button class="ic" data-a="logout" style="padding:2px 6px">Cerrar sesión</button></div></div>
+    <div class="sum"><button class="rst" data-a="reset">Reset</button><br><span id="sumtxt"></span><div class="bar"><i id="sumbar"></i></div></div>
+  </div>
+  <div class="vsw" id="vsw" role="tablist"></div>
+  <section id="tv">
+    <div id="wkbar"></div><div id="rbar"></div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div id="list"></div>
+    <button class="btn" data-a="add">Agregar ejercicio</button>
+    <div id="formwrap"></div>
+  </section>
+  <section id="cv" hidden></section>
+  <section id="gv" hidden></section>
+</main>
+<div id="modal" hidden><div class="mp" role="dialog" aria-modal="true" aria-labelledby="mq"><p id="mq">¿Deseas borrar la rutina que acabas de configurar?</p><div class="acts"><button class="btn" data-a="yes">Sí</button><button class="btn sec" id="noBtn" data-a="no">No</button></div></div></div>
+<div id="timer"><span id="tt">0:00</span><button id="tstop" data-a="tstop">Cerrar</button></div>
+<script>
+var DAYS=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+var S={ex:[],done:{}},cur=(new Date().getDay()+6)%7,editing=null,tInt=null;
+var LIB={"Pecho": {"Barra": "Press de banca plano|Press inclinado|Press declinado|Press de banca con agarre cerrado|Press de banca invertido|Press guillotina|Floor Press con barra|Press Landmine a dos manos|Press de banca con Board (Taco)", "Mancuernas": "Press plano con mancuernas|Press inclinado con mancuernas|Press declinado con mancuernas|Aperturas en banco plano|Aperturas en banco inclinado|Press de pecho neutro (Squeeze Press)|Pull-over con mancuerna|Press plano alternado|Aperturas en banco declinado|Floor Press con mancuernas|Press Landmine con mancuerna", "Máquinas y poleas": "Pec Deck (Mariposa)|Press de pecho sentado en máquina|Cruces de poleas altas|Cruces de poleas bajas|Cruces de poleas medias|Press de pecho en máquina Hammer|Press inclinado en máquina Hammer|Press de banca en Multipower (Smith)|Press inclinado en Multipower|Pec Deck unilateral|Cruces de poleas arrodillado|Press de pecho en polea a una mano", "Calistenia": "Flexiones de brazo tradicionales (Lagartijas)|Flexiones inclinadas|Flexiones declinadas|Fondos en paralelas para pecho|Flexiones diamante|Flexiones arqueras|Flexiones con aplauso (Pliométricas)|Flexiones con déficit|Fondos en barra recta|Flexiones esfinge|Flexiones en anillas|Fondos en anillas|Flexiones Spiderman|Flexiones hindúes|Flexiones tipo flex (Wide push ups)|Flexiones excéntricas lentas|Flexiones isométricas|Flexiones tocando los hombros"}, "Espalda": {"Barra": "Peso muerto convencional|Remo con barra|Remo Pendlay|Remo con barra agarre invertido|Remo en barra T|Peso muerto sumo|Buenos días con barra|Rack Pulls|Remo Landmine a una mano (Remo Meadows)", "Mancuernas": "Remo con mancuerna a una mano|Remo inclinado con dos mancuernas|Remo apoyado en banco inclinado (Remo Seal)|Remo con mancuernas agarre supino|Vuelos posteriores apoyado en banco|Remo renegado|Pull-over con mancuerna para dorsal|Peso muerto rumano con mancuernas|Remo serrucho pesado", "Máquinas y poleas": "Jalón al pecho en polea alta|Remo sentado en polea baja|Jalón con agarre estrecho o invertido|Pull-over en polea alta con brazos rectos|Remo en máquina Hammer|Jalón al pecho unilateral en polea|Remo articulado en polea alta|Máquina de remo bajo con apoyo al pecho|Jalón tras nuca|Remo con soga a la barbilla en polea|Espinales en banco (Hiperextensiones)|Remo en Multipower", "Calistenia": "Dominadas pronas tradicionales|Dominadas supinas (Chin-ups)|Dominadas con agarre neutro|Remo invertido en barra baja (Australians)|Dominadas comando|Dominadas excéntricas lentas|Dominadas escapulares|Remo invertido con agarre supino|Superman en el piso|Dominadas olímpicas (Muscle up)|Front Lever (progresión)|Dominadas con toalla|Dominadas en L (L-sit pull ups)|Remo invertido a una mano|Dominadas pliométricas|El nadador en el piso|Dominadas con agarre ancho|Dominadas con agarre bien estrecho|Isometría colgado en barra|Remo invertido en sábanas o TRX"}, "Piernas": {"Barra": "Sentadilla barra alta|Sentadilla barra baja|Sentadilla frontal|Peso muerto rumano|Estocadas caminando con barra|Sentadilla búlgaras con barra|Sentadilla Zercher|Sentadilla con barra sobre la cabeza (Overhead)|Elevación de talones con barra", "Mancuernas": "Sentadilla Goblet|Estocadas hacia atrás con mancuernas|Sentadilla búlgara con mancuernas|Peso muerto rumano con mancuernas|Sentadilla cosaca con mancuerna|Estocadas laterales con mancuernas|Step-ups con mancuernas (Subidas al cajón)|Peso muerto a una pierna con mancuernas|Elevación de gemelos a una pierna con mancuerna|Sentadilla sumo con mancuerna", "Máquinas y poleas": "Prensa de piernas a 45 grados|Sillón de cuádriceps (Extensiones)|Camilla de isquiotibiales acostado (Curl)|Camilla de isquiotibiales sentado|Sentadilla Hack|Prensa horizontal|Sentadilla en Multipower|Elevación de talones de pie en máquina|Elevación de talones sentado en máquina|Curl de isquios de pie (unilateral)|Puntillas en prensa|Sentadilla péndulo|Belt Squat (Sentadilla con cinturón)", "Calistenia": "Sentadilla tradicional al aire|Sentadilla a una pierna (Pistol Squat)|Sentadilla Sissy|Zancadas estáticas (Split Squat)|Nordic Curl (Curl nórdico)|Saltos al cajón (Box Jumps)|Sentadilla isométrica contra la pared|Tuck Jumps|Sentadilla con salto (Jump Squat)|Estocadas con salto alternadas|Elevación de talones al piso (Gemelos libres)|Sentadilla cosaca libre|Puente de isquiotibiales con pies elevados|Sentadilla hindú|Caminata de pato|Skater Squats|Elevación de gemelos tipo burro|Extensiones de cuádriceps invertidas"}, "Glúteos": {"Barra": "Hip Thrust con barra|Puente de glúteo con barra (Glute Bridge)|Peso muerto rumano con déficit|Sentadilla profunda con barra|Estocadas cruzadas hacia atrás con barra|Buenos días con piernas bien abiertas", "Mancuernas": "Hip Thrust con mancuerna|Peso muerto sumo con mancuerna|Sentadilla búlgara con enfoque en glúteos|Estocadas cruzadas con mancuernas (Curtsy Lunges)|Step-up alto con mancuerna|Patada de glúteo con mancuerna", "Máquinas y poleas": "Patada de glúteo en polea baja|Abductores en máquina|Patada lateral en polea baja|Hip Thrust en máquina|Patada de glúteo en máquina específica|Prensa de piernas con pies altos|Abductores en máquina inclinado adelante|Caminata lateral con banda (Monster walks)|Prensa unilateral de costado|Extensiones de cadera a 45 grados en banco de lumbares", "Calistenia": "Puente de glúteo en el piso|Puente de glúteo a una pierna|Patadas de burro (Glute kicks)|Boca de incendio (Fire hydrant)|Puente de glúteo tipo rana (Frog pumps)|Elevaciones de pierna lateral acostado|Puente de glúteo con marcha|Sentadilla con caminata lateral|Patada de glúteo recta en el piso|Círculos con la pierna en el aire|Plancha lateral con elevación de pierna|Puente de glúteo isométrico|Elevación de cadera inversa|Estocadas inversas libres|Sentadilla profunda isométrica con rebote|Puente de glúteo con talones alejados|Caminata de glúteos (Butt walks)|Elevación de pelvis con rodilla al pecho|Zancadas cruzadas libres|Patada oblicua de glúteo|Círculos de rodilla lateral|Sentadilla cosaca isométrica|Plancha con extensión de cadera|Extensiones de cadera en el piso boca abajo|Puente de glúteo sobre Fitball|Desplantes en caminata lentos|Extensiones de cadera invertidas a una pierna|El arco o puente completo de gimnasia"}, "Hombros y trapecios": {"Barra": "Press militar de pie|Press militar sentado|Remo al mentón con barra|Encogimientos de hombros con barra|Encogimientos de hombros traseros|Press Push con barra (Push Press)|Press tras nuca con barra|Press Landmine unilateral|Press de hombros con barra agarre inverso", "Mancuernas": "Press overhead (hombros) con mancuernas|Vuelos laterales con mancuernas|Vuelos frontales con mancuernas|Vuelos posteriores (Pájaros)|Press Arnold|Vuelos laterales apoyado de lado|Vuelos frontales agarre martillo|Encogimientos de hombros con mancuernas|Vuelos posteriores apoyado en banco|Vuelos laterales con pausa isométrica", "Máquinas y poleas": "Face Pull con cuerda|Vuelos laterales en polea baja|Press de hombros en máquina Hammer|Vuelos posteriores en máquina (Pec Deck invertido)|Vuelos frontales en polea baja|Vuelos laterales cruzados en polea alta|Remo al mentón en polea baja|Encogimientos de hombros en polea baja|Press de hombros en Multipower|Vuelos laterales en máquina específica", "Calistenia": "Flexiones de hombro (Pike Push-ups)|Flexiones haciendo la vertical contra la pared|Isometría en vertical (Handstand hold)|Flexiones Pike elevadas|Caminata por la pared (Wall walks)|Fondos profundos en paralelas|Plancha inclinada hacia adelante (Planche lean)|Elevaciones de trapecio colgado (Escapulares)|Flexiones hindúes enfocado en hombros|Plancha delfín|Vuelos posteriores libres en el piso|Elevaciones frontales libres en I|Elevaciones en Y|Elevaciones en W|Flexiones Pike excéntricas|Transición de plancha baja a alta|Giros de brazos extendidos|Plancha alta con toque de hombros alternado|Flexiones arqueras con enfoque de hombro|Paseos de oso (Bear crawls)|Handstand Push-ups libres"}, "Brazos": {"Barra": "Curl de bíceps con barra recta|Curl con barra Z|Curl inverso con barra|Curl en Banco Scott con barra Z (Predicador)|Press de banca con agarre cerrado|Press francés con barra Z|Curl de muñeca con barra|Curl de muñeca invertido|Press JM", "Mancuernas": "Curl alterno con mancuernas|Curl martillo con mancuernas|Curl inclinado con mancuernas|Curl concentrado|Curl Zottman|Patada de tríceps con mancuerna|Extensión de tríceps tras nuca con mancuerna|Extensión tras nuca a una mano|Tate Press|Curl araña con mancuernas", "Máquinas y poleas": "Curl de bíceps en polea baja con barra corta|Curl de bíceps en polea con soga|Curl Hércules en poleas altas|Extensiones de tríceps en polea alta con soga|Extensiones de tríceps con barra recta en polea|Extensiones de tríceps con agarre invertido|Extensión de tríceps tras nuca en polea baja|Curl de bíceps unilateral en polea detrás del cuerpo|Máquina de curl de bíceps guiada|Máquina de extensiones de tríceps", "Calistenia": "Fondos de tríceps en banco|Dominadas supinas enfocadas en bíceps|Extensiones de tríceps corporales en barra baja|Remo invertido con agarre supino estrecho|Flexiones diamante para tríceps|Flexiones de tríceps esfinge|Fondos en paralelas con torso vertical|Dominadas colgado de una mano (Isometría)|Flexiones con dedos (Finger push ups)|Cuelgue activo en barra gruesa|Fondos en barra recta con agarre supino|Flexiones imposibles|Dominadas comando para braquial|Remo invertido en TRX a una mano|Flexiones de puño|Tiger Bend (Flexión tigre)|Flexiones de brazo con manos apuntando atrás|Isometría a 90 grados en dominada supinada|Extensiones de tríceps en la pared|Paseo del granjero libre (con lo que tengas pesado)|Flexiones excéntricas lentas en diamante"}, "Abdomen y core": {"Barra": "", "Mancuernas": "Giros rusos (Russian Twists)|Flexión lateral con mancuerna", "Máquinas y poleas": "Crunch en polea alta (Rezo)|Paloff Press", "Calistenia": "Crunches abdominales|Elevaciones de piernas suspendido|Plancha isométrica (Plank)|Rueda abdominal (Ab Wheel)|Tijeras de piernas|Plancha lateral|Elevación de piernas en banco declinado|Escaladores (Mountain Climbers)|Bicicletas abdominales|Crunch invertido|Bird Dog|Dead Bug"}};
+var GROUPS=Object.keys(LIB),EQ=["Barra","Mancuernas","Máquinas y poleas","Calistenia"],EX=[];
+GROUPS.forEach(function(g){EQ.forEach(function(e){(LIB[g][e]||"").split("|").forEach(function(n){if(n)EX.push({n:n,g:g,e:e})})})});
+function selOpts(a,sel,blank){return '<option value="">'+blank+'</option>'+a.map(function(k){return '<option'+(k===sel?" selected":"")+'>'+esc(k)+'</option>'}).join("")}
+function exOpts(g,e,sel){var h='<option value="">Elegir de la lista…</option>',by={};
+  EX.forEach(function(x,i){if((g&&x.g!==g)||(e&&x.e!==e))return;var k=g?(e?"":x.e):x.g;(by[k]=by[k]||[]).push('<option value="'+i+'"'+(String(i)===String(sel)?" selected":"")+'>'+esc(x.n)+'</option>')});
+  Object.keys(by).forEach(function(k){h+=k?'<optgroup label="'+esc(k)+'">'+by[k].join("")+'</optgroup>':by[k].join("")});return h}
+var $=function(i){return document.getElementById(i)};
+var MES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],MS=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+var CAT={"Hipertrofia":"#2F5BFF","Fuerza":"#D6453D","Mantenimiento":"#1E9E6A","Cardio":"#8250DF"};
+var ROUT={
+"Hipertrofia":[["Weider (por grupos)","Uno o dos grupos por sesión con mucho volumen; cada músculo descansa una semana."],["Torso/Pierna","Días de tren superior y de tren inferior; cada músculo se entrena dos veces por semana."],["Push/Pull/Legs","Empuje (pecho, hombro, tríceps), tirón (espalda, bíceps) y piernas en días separados."],["Rest-Pause","Serie pesada casi al fallo, pausa de 15-20 s y repeticiones extra."],["Full Body","Todo el cuerpo en cada sesión con ejercicios multiarticulares, unas 3 veces por semana."],["Pirámide ascendente","Subís el peso y bajás las repeticiones serie a serie."],["Pirámide invertida","Arrancás con el peso máximo y bajás la carga subiendo repeticiones en cada serie."]],
+"Fuerza":[["5x5","5 series de 5 repeticiones con cargas altas en básicos; progresión lineal."],["Powerlifting","Foco en sentadilla, press de banca y peso muerto, con descansos de 3 a 5 min."],["Esfuerzo dinámico","Peso moderado (50-60%) movido a máxima velocidad para ganar potencia."],["Concéntrica pura","Sin fase excéntrica: se levanta y se suelta, con menos agujetas."]],
+"Mantenimiento":[["Calistenia controlada","Ejercicios con el propio peso (flexiones, dominadas, fondos) para mantener tono y agilidad."],["Full Body moderado","Cuerpo completo 2 veces por semana, sin llegar al fallo."],["Movilidad y core","Pilates, yoga y estabilidad para postura y abdomen profundo."],["Circuitos de resistencia","4 a 6 ejercicios seguidos con poco peso y 15-20 repeticiones."]],
+"Cardio":[["LISS","Ritmo suave y constante durante 45-60 min."],["HIIT","Esfuerzos máximos cortos alternados con descanso, en 15-20 min."],["Tabata","8 ciclos de 20 s a máxima intensidad y 10 s de pausa; dura 4 min."],["Circuito metabólico","Fuerza ligera o con peso corporal encadenada casi sin descanso (burpees, swings)."]]};
+S={ex:[],done:{},plan:{}};
+var msg="",mon,cm=new Date(),view="t",picking=false;
+function iso(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+function pd(s){var p=s.split("-");return new Date(+p[0],p[1]-1,+p[2])}
+function mondayOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-(x.getDay()+6)%7);return x}
+function addD(d,n){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()+n);return x}
+mon=mondayOf(new Date());
+function dt(){return addD(mon,cur)}
+function planOf(d){return S.plan[iso(mondayOf(d))]||""}
+function exFor(d){var wd=(d.getDay()+6)%7,p=planOf(d);return S.ex.filter(function(e){return e.days.indexOf(wd)>-1&&(!e.r||e.r===p)})}
+function rdesc(n){var r="";Object.keys(ROUT).forEach(function(c){ROUT[c].forEach(function(m){if(c+" · "+m[0]===n)r=m[1]})});return r}
+function rcol(n){return CAT[n.split(" · ")[0]]||"#888"}
+function rOpts(sel,blank){var h='<option value="">'+blank+'</option>';Object.keys(ROUT).forEach(function(c){h+='<optgroup label="'+c+'">'+ROUT[c].map(function(m){var v=c+" · "+m[0];return '<option'+(v===sel?" selected":"")+'>'+esc(v)+'</option>'}).join("")+'</optgroup>'});return h}
+function load(){S={ex:[],done:{},plan:{}};try{var r=localStorage.getItem("tt-data:"+U.id);if(r){var d=JSON.parse(r);if(d&&d.ex){S.ex=d.ex;S.plan=d.plan||{};S.done=d.done||{}}}}catch(e){}}
+function save(){if(!U)return;try{localStorage.setItem("tt-data:"+U.id,JSON.stringify(S))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function fmt(s){s=+s;return s>=60?Math.floor(s/60)+" min"+(s%60?" "+s%60+" s":""):s+" s"}
+function wkTxt(m){var e=addD(m,6);return m.getDate()+" "+MS[m.getMonth()]+" – "+e.getDate()+" "+MS[e.getMonth()]}
+function render(){
+  $("vsw").innerHTML=[["t","Entrenar"],["c","Calendario"],["g","Glosario"]].map(function(x){return '<button class="tab" role="tab" data-a="view" data-v="'+x[0]+'" aria-selected="'+(view===x[0])+'">'+x[1]+'</button>'}).join("");
+  $("tv").hidden=view!=="t";$("cv").hidden=view!=="c";$("gv").hidden=view!=="g";
+  var t=0,d=0;
+  for(var i=0;i<7;i++){var x=addD(mon,i),k=iso(x);exFor(x).forEach(function(e){t++;if(S.done[k+":"+e.id])d++})}
+  $("sumtxt").textContent=t?d+" de "+t+" ejercicios de la semana":"Semana vacía";
+  $("sumbar").style.width=t?(d/t*100)+"%":"0";
+  if(view==="t")rTrack();else if(view==="c")rCal();else rGlos();
+}
+function rTrack(){
+  var p=S.plan[iso(mon)]||"";
+  $("wkbar").innerHTML='<div class="nav"><button class="ic" data-a="wk" data-v="-1" aria-label="Semana anterior">‹</button><div style="text-align:center"><h2>'+wkTxt(mon)+'</h2><button class="chip" data-a="today">Hoy</button></div><button class="ic" data-a="wk" data-v="1" aria-label="Semana siguiente">›</button></div>';
+  var rb='<div class="rbar">'+(p?'<span class="chip" style="background:'+rcol(p)+';color:#fff">'+esc(p)+'</span>':'<span class="dayline">Sin rutina esta semana</span>')+'<button class="ic" data-a="pick">'+(p?"Cambiar rutina":"Elegir rutina")+'</button></div>';
+  if(picking)rb+='<div id="pf" class="fm" style="margin:0 0 12px"><label for="pr">Tipo de entrenamiento</label><select id="pr">'+rOpts(p,"Sin rutina")+'</select><div class="dayline" id="pd">'+esc(rdesc(p))+'</div>'+applyHTML()+'<button class="btn" type="button" data-a="apply" style="margin-top:12px">Aplicar</button></div>';
+  $("rbar").innerHTML=rb+(msg?'<div class="dayline" role="status" style="margin-bottom:10px">'+esc(msg)+'</div>':"");
+  $("tabs").innerHTML=DAYS.map(function(n,i){var x=addD(mon,i),c=exFor(x).length;return '<button class="tab" role="tab" data-a="tab" data-v="'+i+'" aria-selected="'+(i===cur)+'">'+n+'<small>'+x.getDate()+(c?" · "+c:"")+'</small></button>'}).join("");
+  var x=dt(),k=iso(x),L=exFor(x);
+  $("list").innerHTML=L.length?L.map(function(e){var on=!!S.done[k+":"+e.id];
+    return '<div class="row'+(on?" done":"")+'"><input type="checkbox" class="chk" data-c="'+e.id+'"'+(on?" checked":"")+' aria-label="Marcar '+esc(e.name)+'">'
+    +'<div><div class="nm">'+esc(e.name)+'</div><div class="meta"><span class="chip">'+e.sets+' × '+esc(e.reps)+'</span>'
+    +'<button class="chip" data-a="rest" data-v="'+e.rest+'" title="Iniciar descanso">Descanso '+fmt(e.rest)+'</button>'
+    +'<span class="chip">'+e.days.length+'x por semana</span>'+(e.r?'<span class="chip">'+esc(e.r)+'</span>':'')+'</div>'
+    +'<div class="dayline">'+e.days.map(function(y){return DAYS[y]}).join(", ")+'</div></div>'
+    +'<div><button class="ic" data-a="edit" data-v="'+e.id+'">Editar</button></div></div>'}).join("")
+    :'<div class="empty">No hay ejercicios el '+DAYS[cur]+' '+x.getDate()+'.<br>Agrega el primero abajo.</div>';
+}
+function rCal(){
+  var first=new Date(cm.getFullYear(),cm.getMonth(),1),last=new Date(cm.getFullYear(),cm.getMonth()+1,0),start=mondayOf(first),today=iso(new Date()),wks=[];
+  var h='<div class="nav"><button class="ic" data-a="mon" data-v="-1" aria-label="Mes anterior">‹</button><div style="text-align:center"><h2>'+MES[cm.getMonth()]+' '+cm.getFullYear()+'</h2><button class="chip" data-a="today">Hoy</button></div><button class="ic" data-a="mon" data-v="1" aria-label="Mes siguiente">›</button></div><div class="cal">';
+  DAYS.forEach(function(n){h+='<div class="ch">'+n+'</div>'});
+  for(var w=0;w<6;w++){var ms=addD(start,7*w);if(ms>last)break;wks.push(ms);var p=S.plan[iso(ms)]||"";
+    for(var i=0;i<7;i++){var x=addD(ms,i),k=iso(x),ex=exFor(x),dn=ex.filter(function(e){return S.done[k+":"+e.id]}).length;
+      h+='<button class="cell'+(x.getMonth()!==cm.getMonth()?" out":"")+(k===today?" today":"")+(ex.length?" tr":"")+'" data-a="day" data-v="'+k+'" style="border-top:4px solid '+(p?rcol(p):"transparent")+'"><b>'+x.getDate()+'</b>'+(ex.length?'<span>'+(dn===ex.length?"✓ ":"")+dn+'/'+ex.length+'</span>':"")+'</button>'}}
+  h+='</div><h2 style="margin:18px 0 8px">Rutina de cada semana</h2>'+wks.map(function(ms){var p=S.plan[iso(ms)]||"";
+    return '<button class="row wkrow" data-a="week" data-v="'+iso(ms)+'"><span>'+wkTxt(ms)+'</span><span class="chip"'+(p?' style="background:'+rcol(p)+';color:#fff"':'')+'>'+esc(p||"Sin rutina")+'</span></button>'}).join("");
+  $("cv").innerHTML=h;
+}
+var DESC={"Patada de tríceps con mancuerna": "Torso inclinado, codo pegado al cuerpo, extendés el antebrazo hacia atrás.", "Remo con barra": "Torso inclinado, tirás de la barra hacia el ombligo.", "Sentadilla frontal": "Sentadilla con la barra apoyada en la parte delantera de los hombros.", "Flexiones inclinadas": "Flexiones con las manos en un banco elevado; más fáciles.", "Remo en barra T": "Remo con barra anclada en una esquina, subiendo el peso hacia el pecho.", "Flexiones declinadas": "Flexiones con los pies elevados en un banco.", "Peso muerto convencional": "Levantás la barra del suelo hasta quedar erguido; trabaja toda la cadena posterior.", "Dead Bug": "Boca arriba, bajás brazo y pierna opuestos manteniendo el core firme.", "Cruces de poleas bajas": "De pie, tirás de las poleas bajas hacia arriba y al centro.", "Encogimientos de hombros con barra": "Elevás los hombros hacia las orejas para trabajar los trapecios.", "Press de banca con agarre cerrado": "Press plano con manos a la anchura de los hombros; enfatiza tríceps.", "Elevaciones de piernas suspendido": "Colgado de una barra, elevás las piernas hasta unos 90 grados.", "Pull-over con mancuerna": "Acostado, llevás una mancuerna con brazos estirados desde detrás de la cabeza al pecho.", "Press de hombros en máquina Hammer": "Movimiento vertical guiado, ideal para cargas pesadas con seguridad.", "Crunch en polea alta (Rezo)": "De rodillas frente a la polea, flexionás el torso hacia el suelo con la cuerda.", "Crunch invertido": "Acostado, llevás las rodillas al pecho levantando un poco la zona lumbar.", "Giros rusos (Russian Twists)": "Sentado, torso inclinado atrás y pies en el aire, girás con peso de lado a lado.", "Bicicletas abdominales": "Acostado, tocás la rodilla con el codo contrario simulando pedalear.", "Dominadas supinas (Chin-ups)": "Igual, pero con las palmas hacia vos; involucra más el bíceps.", "Bird Dog": "En cuatro apoyos, extendés a la vez un brazo y la pierna contraria.", "Remo en máquina Hammer": "Remo guiado y sentado; permite aislar la espalda de forma unilateral.", "Escaladores (Mountain Climbers)": "En plancha alta, llevás las rodillas al pecho de forma alterna y rápida.", "Remo con mancuerna a una mano": "Con una rodilla en el banco, tirás de la mancuerna hacia la cadera.", "Flexión lateral con mancuerna": "De pie con una mancuerna al costado, la deslizás hacia abajo flexionando el torso.", "Paloff Press": "En polea lateral, empujás el cable al frente resistiendo la rotación del torso.", "Press plano con mancuernas": "Alternativa al press con barra: más rango de movimiento y trabajo unilateral.", "Press francés con barra Z": "Acostado, bajás la barra hacia la frente y extendés los codos.", "Tijeras de piernas": "Boca arriba, subís y bajás las piernas alternadas sin tocar el suelo.", "Jalón al pecho en polea alta": "Sentado, tirás de la barra hacia la parte alta del pecho.", "Remo Pendlay": "Remo con barra donde cada repetición parte y termina en el suelo.", "Sentadilla Goblet": "Mancuerna vertical frente al pecho y sentadilla profunda.", "Remo sentado en polea baja": "Sentado, tirás del cable hacia el abdomen con la espalda recta.", "Remo al mentón con barra": "Tirás de la barra hacia arriba pegada al cuerpo, con codos sobre los hombros.", "Peso muerto rumano": "Bajás la barra por los muslos con rodillas semirrígidas; trabaja glúteos e isquios.", "Sentadilla Hack": "Apoyado en la máquina inclinada, descendés y empujás con las piernas.", "Plancha isométrica (Plank)": "Cuerpo en línea recta apoyado en antebrazos y puntas de pies.", "Curl concentrado": "Sentado, codo apoyado en el muslo, flexionás con una mancuerna.", "Elevación de piernas en banco declinado": "Acostado en banco declinado, elevás las piernas hacia el techo despegando la pelvis.", "Rueda abdominal (Ab Wheel)": "De rodillas, rodás el rodillo hacia adelante y volvés con el abdomen.", "Puntillas en prensa": "Puntas de los pies en el borde de la prensa, flexión plantar para gemelos.", "Crunches abdominales": "Boca arriba, despegás los omóplatos del suelo contrayendo el abdomen.", "Cruces de poleas altas": "De pie, tirás de las poleas altas hacia abajo y al centro.", "Press Arnold": "Press que arranca con las palmas hacia vos y las gira hacia afuera al subir.", "Plancha lateral": "De lado sobre un antebrazo, mantenés la cadera elevada en línea recta.", "Press inclinado con mancuernas": "En banco inclinado, empujás las mancuernas; trabaja la parte superior."};
+var gs="e",gf="",ge="";
+function rGlos(){
+  var h='<div class="vsw" style="margin-top:0;grid-template-columns:1fr 1fr">'+[["e","Ejercicios"],["r","Rutinas"]].map(function(x){return '<button class="tab" data-a="gs" data-v="'+x[0]+'" aria-selected="'+(gs===x[0])+'">'+x[1]+'</button>'}).join("")+'</div>';
+  if(gs==="e"){
+    h+='<div class="g3" style="grid-template-columns:1fr 1fr;margin:0"><div><label for="gg">Grupo muscular</label><select id="gg">'+selOpts(GROUPS,gf,"Todos")+'</select></div><div><label for="ge">Tipo de elemento</label><select id="ge">'+selOpts(EQ,ge,"Todos")+'</select></div></div>';
+    GROUPS.filter(function(g){return !gf||g===gf}).forEach(function(g){var b="";
+      EQ.forEach(function(e){if(ge&&e!==ge)return;var L=EX.filter(function(x){return x.g===g&&x.e===e});if(!L.length)return;
+        b+='<div class="dayline" style="margin-top:12px;font-weight:600">'+e+'</div><dl class="gl">'+L.map(function(x){return '<dt>'+esc(x.n)+'</dt>'+(DESC[x.n]?'<dd>'+esc(DESC[x.n])+'</dd>':'')}).join("")+'</dl>'});
+      if(b)h+='<h2 class="gh">'+g+'</h2>'+b})
+  }else{
+    Object.keys(ROUT).forEach(function(c){h+='<h2 class="gh" style="color:'+CAT[c]+'">'+c+'</h2><dl class="gl">'+ROUT[c].map(function(m){return '<dt>'+esc(m[0])+'</dt><dd>'+esc(m[1])+'</dd>'}).join("")+'</dl>'})
+  }
+  $("gv").innerHTML=h;
+}
+function openForm(id){
+  editing=id;var e=S.ex.filter(function(x){return x.id===id})[0]||{name:"",sets:3,reps:"10",rest:90,days:[cur],r:S.plan[iso(mon)]||""};
+  $("formwrap").innerHTML='<div id="f" class="fm"><label for="fro">1. Rutina (obligatoria)</label><select id="fro">'+rOpts(e.r||"","Elegí una rutina…")+'</select><div class="dayline" id="ferr" style="color:#C62828;margin-top:4px"></div>'
+  +(id?"":applyHTML())
+  +'<div id="fbody"'+(e.r?"":" hidden")+' style="margin-top:12px"><div class="dayline" style="margin-bottom:10px">2. Ejercicio, series y días</div>'
+  +'<div class="g3" style="grid-template-columns:1fr 1fr;margin-top:0"><div><label for="fg">Grupo muscular</label><select id="fg">'+selOpts(GROUPS,"","Todos")+'</select></div><div><label for="fe">Tipo de elemento</label><select id="fe">'+selOpts(EQ,"","Todos")+'</select></div></div><label for="fx">Ejercicio de la lista</label><select id="fx">'+exOpts("","")+'</select><div style="height:12px"></div>'
+  +'<label for="fn">Nombre (elegido o propio)</label><input id="fn" required maxlength="60" value="'+esc(e.name)+'" placeholder="Elegí arriba o escribí uno propio">'
+  +'<div class="g3" style="grid-template-columns:1fr 1fr 1fr"><div><label for="fs">Series</label><input id="fs" type="number" min="1" max="20" value="'+e.sets+'"></div>'
+  +'<div><label for="fr">Repeticiones</label><input id="fr" maxlength="10" value="'+esc(e.reps)+'" placeholder="8-12"></div>'
+  +'<div><label for="fd">Descanso (seg)</label><input id="fd" type="number" min="0" max="600" step="5" value="'+e.rest+'"></div></div>'
+  +'<label>Días de la semana (define la frecuencia)</label><div class="days">'+DAYS.map(function(n,i){return '<label><input type="checkbox" value="'+i+'"'+(e.days.indexOf(i)>-1?" checked":"")+'><span>'+n+'</span></label>'}).join("")+'</div></div>'
+  +'<div class="acts"><button class="btn" type="button" data-a="save">'+(id?"Guardar cambios":"Guardar ejercicio")+'</button><button class="btn sec" type="button" data-a="cancel">Cancelar</button></div>'
+  +(id?'<button class="ic" type="button" data-a="del" style="margin-top:8px">Eliminar ejercicio</button>':"")+'</div>';
+  $(e.r?"fn":"fro").focus();$("f").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function closeForm(){$("formwrap").innerHTML="";editing=null}
+function startTimer(sec){clearInterval(tInt);var end=Date.now()+sec*1000,el=$("tt");$("timer").style.display="flex";
+  function tick(){var r=Math.max(0,Math.ceil((end-Date.now())/1000));el.textContent=(r>=60?Math.floor(r/60)+":"+("0"+r%60).slice(-2):r+" s");
+    if(!r){clearInterval(tInt);el.textContent="¡A la siguiente serie!";try{navigator.vibrate&&navigator.vibrate(300)}catch(e){}}}
+  tick();tInt=setInterval(tick,250)}
+document.addEventListener("click",function(ev){
+  var b=ev.target.closest("[data-a]");if(!b)return;var a=b.dataset.a,v=b.dataset.v;msg="";
+  if(a==="reset"){$("modal").hidden=false;$("noBtn").focus();return}
+  if(a==="no"){$("modal").hidden=true;return}
+  if(a==="amode"){amode=v;rAuth();return}
+  if(a==="auth"){doAuth();return}
+  if(a==="logout"){logout();return}
+  if(a==="add"){openForm(null);return}
+  if(a==="edit"){openForm(v);return}
+  if(a==="cancel"){closeForm();return}
+  if(a==="save"){submitForm("f");return}
+  if(a==="apply"){submitForm("pf");return}
+  if(a==="rest"){startTimer(+v);return}
+  if(a==="tstop"){clearInterval(tInt);$("timer").style.display="none";return}
+  if(a==="del"){S.ex=S.ex.filter(function(x){return x.id!==editing});closeForm();save()}
+  else if(a==="yes"){S={ex:[],done:{},plan:{}};picking=false;closeForm();$("modal").hidden=true;save()}
+  else if(a==="view"){view=v;if(v==="c"){var x=dt();cm=new Date(x.getFullYear(),x.getMonth(),1)}}
+  else if(a==="tab")cur=+v;
+  else if(a==="wk")mon=addD(mon,7*(+v));
+  else if(a==="mon")cm=new Date(cm.getFullYear(),cm.getMonth()+(+v),1);
+  else if(a==="day"){var y=pd(v);mon=mondayOf(y);cur=(y.getDay()+6)%7;view="t"}
+  else if(a==="week"){mon=pd(v);view="t"}
+  else if(a==="gs")gs=v;
+  else if(a==="today"){var n=new Date();mon=mondayOf(n);cur=(n.getDay()+6)%7;cm=new Date(n.getFullYear(),n.getMonth(),1)}
+  else if(a==="pick")picking=!picking;
+  else if(a==="resetweek"){for(var i=0;i<7;i++){var k=iso(addD(mon,i))+":";Object.keys(S.done).forEach(function(q){if(q.indexOf(k)===0)delete S.done[q]})}save()}
+  render();
+});
+document.addEventListener("change",function(ev){var id=ev.target.id;
+  if(ev.target.name==="ap"){$("apn").disabled=ev.target.value!=="w";return}
+  if(id==="fro"){$("fbody").hidden=!ev.target.value;$("ferr").textContent="";return}
+  if(id==="gg"||id==="ge"){if(id==="gg")gf=ev.target.value;else ge=ev.target.value;render();return}
+  if(id==="fg"||id==="fe"){$("fx").innerHTML=exOpts($("fg").value,$("fe").value,$("fx").value);return}
+  if(id==="fx"){var it=EX[ev.target.value];if(it){$("fn").value=it.n;$("fg").value=it.g;$("fe").value=it.e;$("fx").innerHTML=exOpts(it.g,it.e,ev.target.value)}return}
+  if(id==="pr"){$("pd").textContent=rdesc(ev.target.value);return}
+  var c=ev.target.dataset&&ev.target.dataset.c;
+  if(c){var k=iso(dt())+":"+c;if(ev.target.checked)S.done[k]=1;else delete S.done[k];save();render()}});
+function applyHTML(){var m=dt().getMonth(),N=function(i){return MES[(m+i)%12]};
+  function R(v,t){return '<label class="ap"><input type="radio" name="ap" value="'+v+'"> '+t+'</label>'}
+  return '<div style="margin:10px 0"><div class="dayline">Aplicar la rutina a</div><label class="ap"><input type="radio" name="ap" value="w" checked> Semanas <input id="apn" type="number" min="1" max="12" value="1" style="width:72px"></label>'
+   +R("1","Mes en curso ("+N(0)+")")+R("2","Mes en curso y próximo mes ("+N(0)+" y "+N(1)+")")+R("3","3 meses ("+N(0)+" a "+N(2)+")")+'</div>'}
+function selMode(){var r=document.querySelector("input[name=ap]:checked");return r?r.value:"w"}
+function weeksSel(mode,n){var ks=[],x=dt();
+  if(mode!=="w"){var last=new Date(x.getFullYear(),x.getMonth()+(+mode),0);for(var m=mondayOf(new Date(x.getFullYear(),x.getMonth(),1));m<=last;m=addD(m,7))ks.push(iso(m))}
+  else for(var i=0;i<Math.min(12,Math.max(1,n||1));i++)ks.push(iso(addD(mon,7*i)));
+  return ks}
+function submitForm(which){
+  if(which==="pf"){var r=$("pr").value,ks=weeksSel(selMode(),+$("apn").value);ks.forEach(function(k){if(r)S.plan[k]=r;else delete S.plan[k]});
+    picking=false;save();render();return}
+  var days=[].slice.call(document.querySelectorAll(".days input:checked")).map(function(i){return +i.value});
+  if(!$("fro").value){$("ferr").textContent="Elegí una rutina para continuar.";$("fro").focus();return}
+  var name=$("fn").value.trim();
+  if(!name){$("fn").focus();return}
+  if(!days.length){days=[cur]}
+  var wasNew=!editing;
+  var o={name:name,sets:Math.max(1,+$("fs").value||1),reps:$("fr").value.trim()||"10",rest:Math.max(0,+$("fd").value||0),days:days,r:$("fro").value};
+  if(editing){S.ex=S.ex.map(function(x){return x.id===editing?Object.assign({id:x.id},o):x})}
+  else{o.id="e"+Date.now().toString(36);S.ex.push(o);if(days.indexOf(cur)<0)cur=days[0]}
+  var wp=S.plan[iso(mon)]||"";
+  if(wasNew){var ks=weeksSel(selMode(),+$("apn").value);ks.forEach(function(k){S.plan[k]=o.r});
+    msg="Rutina "+o.r+" aplicada a "+ks.length+(ks.length>1?" semanas.":" semana.")}
+  else if(wp!==o.r)msg="Se guardó en "+o.r+": aparece en las semanas con esa rutina, no en esta ("+wp+").";
+  closeForm();save();render();
+}
+document.addEventListener("keydown",function(ev){if(ev.key==="Escape")$("modal").hidden=true});
+document.addEventListener("keydown",function(ev){if(ev.key!=="Enter"||ev.target.tagName!=="INPUT"||ev.target.type==="checkbox"||ev.target.type==="radio")return;var f=ev.target.closest(".fm");if(f){ev.preventDefault();submitForm(f.id)}else if(ev.target.closest("#auth")){ev.preventDefault();doAuth()}});
+var U=null,amode="login";
+function users(){try{return JSON.parse(localStorage.getItem("tt-users")||"{}")}catch(e){return {}}}
+function rnd(){var a=new Uint8Array(12);try{crypto.getRandomValues(a)}catch(e){for(var i=0;i<12;i++)a[i]=Math.random()*256}return Array.from(a).map(function(x){return("0"+x.toString(16)).slice(-2)}).join("")}
+async function hash(pw,salt,alg){
+  if(alg==="p"){var enc=new TextEncoder(),k=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveBits"]),b=await crypto.subtle.deriveBits({name:"PBKDF2",salt:enc.encode(salt),iterations:100000,hash:"SHA-256"},k,256);
+    return Array.from(new Uint8Array(b)).map(function(x){return("0"+x.toString(16)).slice(-2)}).join("")}
+  var t=salt+":"+pw,h=5381,g=52711;for(var i=0;i<t.length;i++){h=((h<<5)+h+t.charCodeAt(i))|0;g=((g<<5)^g^t.charCodeAt(t.length-1-i))|0}return "f"+h+"_"+g}
+function rAuth(){var us=users(),names=Object.keys(us).map(function(k){return us[k].name});if(!names.length)amode="new";
+  var h='<div class="mp" style="max-width:380px;margin:10vh auto 0"><h1 style="margin-bottom:14px">Training tracker</h1>';
+  if(names.length)h+='<div class="vsw" style="grid-template-columns:1fr 1fr">'+[["login","Ingresar"],["new","Crear cuenta"]].map(function(x){return '<button class="tab" data-a="amode" data-v="'+x[0]+'" aria-selected="'+(amode===x[0])+'">'+x[1]+'</button>'}).join("")+'</div>';
+  if(amode==="login")h+='<label for="an">Nombre</label><select id="an">'+names.map(function(n){return '<option>'+esc(n)+'</option>'}).join("")+'</select><label for="ap1" style="margin-top:10px">Contraseña</label><input id="ap1" type="password" autocomplete="current-password">';
+  else h+='<label for="an">Nombre</label><input id="an" maxlength="30" autocomplete="username"><label for="ap1" style="margin-top:10px">Contraseña (mínimo 4 caracteres)</label><input id="ap1" type="password" autocomplete="new-password"><label for="ap2" style="margin-top:10px">Repetir contraseña</label><input id="ap2" type="password" autocomplete="new-password">';
+  h+='<div class="dayline" id="aerr" style="color:#C62828;min-height:1.3em;margin:8px 0"></div><button class="btn" data-a="auth">'+(amode==="login"?"Ingresar":"Crear cuenta")+'</button><div class="dayline" style="margin-top:12px">Las cuentas y los datos se guardan en este dispositivo.</div></div>';
+  $("auth").innerHTML=h}
+async function doAuth(){var us=users(),n=$("an").value.trim(),pw=$("ap1").value,er=function(t){$("aerr").textContent=t},id=n.toLowerCase();
+  if(!n||!pw){er("Completá nombre y contraseña.");return}
+  try{
+    if(amode==="new"){
+      if(us[id]){er("Ese nombre ya existe en este dispositivo.");return}
+      if(pw.length<4){er("La contraseña debe tener al menos 4 caracteres.");return}
+      if(pw!==$("ap2").value){er("Las contraseñas no coinciden.");return}
+      var salt=rnd(),alg=(window.crypto&&crypto.subtle)?"p":"f";
+      us[id]={name:n,salt:salt,a:alg,h:await hash(pw,salt,alg)};localStorage.setItem("tt-users",JSON.stringify(us))}
+    else{var r=us[id];if(!r||(await hash(pw,r.salt,r.a))!==r.h){er("Nombre o contraseña incorrectos.");return}}
+  }catch(e){er("No se pudo completar. Probá abrir la app desde un link https.");return}
+  enter(id,us[id].name)}
+function enter(id,name){U={id:id,name:name};try{localStorage.setItem("tt-session",id)}catch(e){}
+  load();mon=mondayOf(new Date());cur=(new Date().getDay()+6)%7;view="t";picking=false;msg="";closeForm();
+  $("auth").hidden=true;$("app").hidden=false;$("who").textContent="Hola, "+name;render()}
+function logout(){U=null;try{localStorage.removeItem("tt-session")}catch(e){}
+  clearInterval(tInt);$("timer").style.display="none";$("modal").hidden=true;$("app").hidden=true;$("auth").hidden=false;amode="login";rAuth()}
+function boot(){var us=users(),id=null;try{id=localStorage.getItem("tt-session")}catch(e){}
+  if(id&&us[id])enter(id,us[id].name);else{$("auth").hidden=false;rAuth()}}
+boot();
+</script>
+</body>
+</html>
